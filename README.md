@@ -3,6 +3,13 @@
 # No Longer Maintained
 This repository is no longer maintained. Feel free to fork it if you find it useful.
 
+> **Ten fork** (`Dominoxan/weather-chart-card`) jest utrzymywany prywatnie na potrzeby własnej instalacji Home Assistant.
+> Zmiany względem `mlamberts78/weather-chart-card` V2.4.11:
+> - polskie tłumaczenia interfejsu edytora karty (`editorLocale` w `src/locale.js`); inne języki dostają angielski fallback,
+> - przypięte wersje zależności (`chart.js 4.4.1`, `lit 2.8.0`, `rollup 4.9.6`, override `@kurkle/color 0.3.2`) i `package-lock.json` w repo — build odtwarza bundle V2.4.11 bajt w bajt.
+>
+> Instalacja: HACS → Custom repositories → `https://github.com/Dominoxan/weather-chart-card` → kategoria *Dashboard*.
+
 [![Buy me a coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/mlamberts7I)
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal)](https://www.paypal.com/donate/?hosted_button_id=HZUUW64FRM2J2)
 
