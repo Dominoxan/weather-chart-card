@@ -785,6 +785,83 @@ const locale = {
   },
 };
 
+// Interfejs edytora karty. Kluczem jest angielska etykieta (default), wartosci tylko dla jezykow
+// przetlumaczonych — brak wpisu = zostaje angielski tekst z kodu edytora.
+const editorLocale = {
+  pl: {
+    'Entity': 'Encja',
+    'Title': 'Tytuł',
+    'Forecast type:': 'Typ prognozy:',
+    'Daily forecast': 'Prognoza dzienna',
+    'Hourly forecast': 'Prognoza godzinowa',
+    'Chart style:': 'Styl wykresu:',
+    'Chart style 1': 'Styl wykresu 1',
+    'Chart style 2': 'Styl wykresu 2',
+    'Settings:': 'Ustawienia:',
+    'Main': 'Główne',
+    'Forecast': 'Prognoza',
+    'Units': 'Jednostki',
+    'Alternate entities': 'Alternatywne encje',
+    'Show Main': 'Pokaż sekcję główną',
+    'Show Feels Like Temperature': 'Pokaż temperaturę odczuwalną',
+    'Show Weather Description': 'Pokaż opis pogody',
+    'Show Current Temperature': 'Pokaż aktualną temperaturę',
+    'Show Current Weather Condition': 'Pokaż aktualny stan pogody',
+    'Show Attributes': 'Pokaż atrybuty',
+    'Show Humidity': 'Pokaż wilgotność',
+    'Show Pressure': 'Pokaż ciśnienie',
+    'Show Sun': 'Pokaż zachód słońca',
+    'Show Wind Direction': 'Pokaż kierunek wiatru',
+    'Show Wind Speed': 'Pokaż prędkość wiatru',
+    'Show Dew Point': 'Pokaż punkt rosy',
+    'Show Wind Gust Speed': 'Pokaż porywy wiatru',
+    'Show Visibility': 'Pokaż widoczność',
+    'Show when last data changed': 'Pokaż czas ostatniej zmiany danych',
+    'Use 12-Hour Format': 'Format 12-godzinny',
+    'Autoscroll': 'Automatyczne przewijanie',
+    'Show Current Time': 'Pokaż aktualny czas',
+    'Show Seconds': 'Pokaż sekundy',
+    'Show Day': 'Pokaż dzień tygodnia',
+    'Show Date': 'Pokaż datę',
+    'Time text size': 'Rozmiar tekstu czasu',
+    'Day and date text size': 'Rozmiar tekstu dnia i daty',
+    'Use Animated Icons': 'Animowane ikony',
+    'Style 1': 'Styl 1',
+    'Style 2': 'Styl 2',
+    'Icon Size for animated or custom icons': 'Rozmiar ikon animowanych i własnych',
+    'Curent temperature Font Size': 'Rozmiar czcionki temperatury',
+    'Custom icon path': 'Ścieżka do własnych ikon',
+    'Select custom language': 'Język karty',
+    'HA Default': 'Domyślny HA',
+    'Show Condition Icons': 'Pokaż ikony pogody',
+    'Show Wind Forecast': 'Pokaż prognozę wiatru',
+    'Rounding Temperatures': 'Zaokrąglaj temperatury',
+    'Disable Chart Animation': 'Wyłącz animację wykresu',
+    'Precipitation Type (Probability if supported by the weather entity)': 'Typ opadów (prawdopodobieństwo, jeśli encja pogody je udostępnia)',
+    'Rainfall': 'Opady',
+    'Probability': 'Prawdopodobieństwo',
+    'Show precipitation probability': 'Pokaż prawdopodobieństwo opadów',
+    'Precipitation Bar Size %': 'Grubość słupków opadów (%)',
+    'Labels Font Size': 'Rozmiar czcionki etykiet',
+    'Chart height': 'Wysokość wykresu',
+    'Number of forecasts': 'Liczba prognoz',
+    'Convert pressure to': 'Przelicz ciśnienie na',
+    'Convert wind speed to': 'Przelicz prędkość wiatru na',
+    'Alternative sensors for the main card attributes:': 'Alternatywne czujniki dla atrybutów karty:',
+    'Alternative temperature sensor': 'Alternatywny czujnik temperatury',
+    'Alternative feels like temperature sensor': 'Alternatywny czujnik temperatury odczuwalnej',
+    'Alternative weather description sensor': 'Alternatywny czujnik opisu pogody',
+    'Alternative pressure sensor': 'Alternatywny czujnik ciśnienia',
+    'Alternative humidity sensor': 'Alternatywny czujnik wilgotności',
+    'Alternative UV index sensor': 'Alternatywny czujnik indeksu UV',
+    'Alternative wind bearing sensor': 'Alternatywny czujnik kierunku wiatru',
+    'Alternative wind speed sensor': 'Alternatywny czujnik prędkości wiatru',
+    'Alternative dew pointsensor': 'Alternatywny czujnik punktu rosy',
+    'Alternative wind gust speed sensor': 'Alternatywny czujnik porywów wiatru',
+    'Alternative visibility sensor': 'Alternatywny czujnik widoczności',
+  },
+};
+
 const cardinalDirectionsIcon = [
   'arrow-down', 'arrow-bottom-left', 'arrow-left',
   'arrow-top-left', 'arrow-up', 'arrow-top-right',
@@ -1062,6 +1139,23 @@ class WeatherChartCardEditor extends s {
     this.requestUpdate();
   }
 
+  t(str) {
+    const lang = (this._config && this._config.locale) || (this.hass && this.hass.language) || 'en';
+    const table = editorLocale[lang];
+    return (table && table[str]) || str;
+  }
+
+  langName(code) {
+    const target = (this._config && this._config.locale) || (this.hass && this.hass.language) || 'en';
+    try {
+      const tag = code === 'no' ? 'nb' : code;
+      const name = new Intl.DisplayNames([target], { type: 'language' }).of(tag) || code;
+      return name.charAt(0).toUpperCase() + name.slice(1);
+    } catch (e) {
+      return code;
+    }
+  }
+
   render() {
     if (this._config && this._config.entity !== this._entity) {
       this._entity = this._config.entity;
@@ -1143,7 +1237,7 @@ class WeatherChartCardEditor extends s {
 <ha-select
   naturalMenuWidth
   fixedMenuPosition
-  label="Entity"
+  label="${this.t('Entity')}"
   .configValue=${'entity'}
   .value=${this._entity}
   @change=${(e) => this._EntityChanged(e, 'entity')}
@@ -1152,13 +1246,13 @@ class WeatherChartCardEditor extends s {
   ${this.entities.map((entity) => x`<ha-list-item .value=${entity}>${entity}</ha-list-item>`)}
 </ha-select>
       <ha-textfield
-        label="Title"
+        label="${this.t('Title')}"
         .value="${this._config.title || ''}"
         @change="${(e) => this._valueChanged(e, 'title')}"
       ></ha-textfield>
        </div>
 
-      <h5>Forecast type:</h5>
+      <h5>${this.t('Forecast type:')}</h5>
 
       <div class="radio-group">
         <ha-radio
@@ -1167,9 +1261,7 @@ class WeatherChartCardEditor extends s {
           @change="${this._handleTypeChange}"
           .checked="${forecastConfig.type === 'daily'}"
         ></ha-radio>
-        <label class="check-label">
-          Daily forecast
-        </label>
+        <label class="check-label">${this.t('Daily forecast')}</label>
       </div>
 
       <div class="radio-group">
@@ -1179,12 +1271,10 @@ class WeatherChartCardEditor extends s {
           @change="${this._handleTypeChange}"
           .checked="${forecastConfig.type === 'hourly'}"
         ></ha-radio>
-        <label class="check-label">
-          Hourly forecast
-        </label>
+        <label class="check-label">${this.t('Hourly forecast')}</label>
       </div>
 
-      <h5>Chart style:</h5>
+      <h5>${this.t('Chart style:')}</h5>
       <div class="radio-container">
         <div class="switch-right">
           <ha-radio
@@ -1193,9 +1283,7 @@ class WeatherChartCardEditor extends s {
             @change="${this._handleStyleChange}"
             .checked="${forecastConfig.style === 'style1'}"
           ></ha-radio>
-          <label class="check-label">
-            Chart style 1
-          </label>
+          <label class="check-label">${this.t('Chart style 1')}</label>
         </div>
 
         <div class="switch-right">
@@ -1205,19 +1293,17 @@ class WeatherChartCardEditor extends s {
             @change="${this._handleStyleChange}"
             .checked="${forecastConfig.style === 'style2'}"
           ></ha-radio>
-          <label class="check-label">
-            Chart style 2
-          </label>
+          <label class="check-label">${this.t('Chart style 2')}</label>
         </div>
       </div>
 
         <!-- Buttons to switch between pages -->
-       <h4>Settings:</h4>
+       <h4>${this.t('Settings:')}</h4>
        <div class="buttons-container">
-         <mwc-button @click="${() => this.showPage('card')}">Main</mwc-button>
-         <mwc-button @click="${() => this.showPage('forecast')}">Forecast</mwc-button>
-         <mwc-button @click="${() => this.showPage('units')}">Units</mwc-button>
-         <mwc-button @click="${() => this.showPage('alternate')}">Alternate entities</mwc-button>
+         <mwc-button @click="${() => this.showPage('card')}">${this.t('Main')}</mwc-button>
+         <mwc-button @click="${() => this.showPage('forecast')}">${this.t('Forecast')}</mwc-button>
+         <mwc-button @click="${() => this.showPage('units')}">${this.t('Units')}</mwc-button>
+         <mwc-button @click="${() => this.showPage('alternate')}">${this.t('Alternate entities')}</mwc-button>
        </div>
 
         <!-- Card Settings Page -->
@@ -1227,9 +1313,7 @@ class WeatherChartCardEditor extends s {
               @change="${(e) => this._valueChanged(e, 'show_main')}"
               .checked="${this._config.show_main !== false}"
             ></ha-switch>
-            <label class="switch-label">
-              Show Main
-            </label>
+            <label class="switch-label">${this.t('Show Main')}</label>
           </div>
       <div class="switch-container">
         ${this.hasApparentTemperature ? x`
@@ -1237,9 +1321,7 @@ class WeatherChartCardEditor extends s {
             @change="${(e) => this._valueChanged(e, 'show_feels_like')}"
             .checked="${this._config.show_feels_like !== false}"
           ></ha-switch>
-          <label class="switch-label">
-            Show Feels Like Temperature
-          </label>
+          <label class="switch-label">${this.t('Show Feels Like Temperature')}</label>
         ` : ''}
       </div>
       <div class="switch-container">
@@ -1248,9 +1330,7 @@ class WeatherChartCardEditor extends s {
             @change="${(e) => this._valueChanged(e, 'show_description')}"
             .checked="${this._config.show_description !== false}"
           ></ha-switch>
-          <label class="switch-label">
-            Show Weather Description
-          </label>
+          <label class="switch-label">${this.t('Show Weather Description')}</label>
         ` : ''}
       </div>
           <div class="switch-container">
@@ -1258,72 +1338,56 @@ class WeatherChartCardEditor extends s {
               @change="${(e) => this._valueChanged(e, 'show_temperature')}"
               .checked="${this._config.show_temperature !== false}"
             ></ha-switch>
-            <label class="switch-label">
-              Show Current Temperature
-            </label>
+            <label class="switch-label">${this.t('Show Current Temperature')}</label>
           </div>
           <div class="switch-container">
             <ha-switch
               @change="${(e) => this._valueChanged(e, 'show_current_condition')}"
               .checked="${this._config.show_current_condition !== false}"
             ></ha-switch>
-            <label class="switch-label">
-              Show Current Weather Condition
-            </label>
+            <label class="switch-label">${this.t('Show Current Weather Condition')}</label>
           </div>
           <div class="switch-container">
             <ha-switch
               @change="${(e) => this._valueChanged(e, 'show_attributes')}"
               .checked="${this._config.show_attributes !== false}"
             ></ha-switch>
-            <label class="switch-label">
-              Show Attributes
-            </label>
+            <label class="switch-label">${this.t('Show Attributes')}</label>
           </div>
           <div class="switch-container">
             <ha-switch
               @change="${(e) => this._valueChanged(e, 'show_humidity')}"
               .checked="${this._config.show_humidity !== false}"
             ></ha-switch>
-            <label class="switch-label">
-              Show Humidity
-            </label>
+            <label class="switch-label">${this.t('Show Humidity')}</label>
           </div>
           <div class="switch-container">
             <ha-switch
               @change="${(e) => this._valueChanged(e, 'show_pressure')}"
               .checked="${this._config.show_pressure !== false}"
             ></ha-switch>
-            <label class="switch-label">
-              Show Pressure
-            </label>
+            <label class="switch-label">${this.t('Show Pressure')}</label>
           </div>
           <div class="switch-container">
             <ha-switch
               @change="${(e) => this._valueChanged(e, 'show_sun')}"
               .checked="${this._config.show_sun !== false}"
             ></ha-switch>
-            <label class="switch-label">
-              Show Sun
-            </label>
+            <label class="switch-label">${this.t('Show Sun')}</label>
           </div>
           <div class="switch-container">
             <ha-switch
               @change="${(e) => this._valueChanged(e, 'show_wind_direction')}"
               .checked="${this._config.show_wind_direction !== false}"
             ></ha-switch>
-            <label class="switch-label">
-              Show Wind Direction
-            </label>
+            <label class="switch-label">${this.t('Show Wind Direction')}</label>
           </div>
           <div class="switch-container">
             <ha-switch
               @change="${(e) => this._valueChanged(e, 'show_wind_speed')}"
               .checked="${this._config.show_wind_speed !== false}"
             ></ha-switch>
-            <label class="switch-label">
-              Show Wind Speed
-            </label>
+            <label class="switch-label">${this.t('Show Wind Speed')}</label>
 	  </div>
       <div class="switch-container">
         ${this.hasDewpoint ? x`
@@ -1331,9 +1395,7 @@ class WeatherChartCardEditor extends s {
             @change="${(e) => this._valueChanged(e, 'show_dew_point')}"
             .checked="${this._config.show_dew_point !== false}"
           ></ha-switch>
-          <label class="switch-label">
-            Show Dew Point
-          </label>
+          <label class="switch-label">${this.t('Show Dew Point')}</label>
         ` : ''}
       </div>
       <div class="switch-container">
@@ -1342,9 +1404,7 @@ class WeatherChartCardEditor extends s {
             @change="${(e) => this._valueChanged(e, 'show_wind_gust_speed')}"
             .checked="${this._config.show_wind_gust_speed !== false}"
           ></ha-switch>
-          <label class="switch-label">
-            Show Wind Gust Speed
-          </label>
+          <label class="switch-label">${this.t('Show Wind Gust Speed')}</label>
         ` : ''}
       </div>
       <div class="switch-container">
@@ -1353,9 +1413,7 @@ class WeatherChartCardEditor extends s {
             @change="${(e) => this._valueChanged(e, 'show_visibility')}"
             .checked="${this._config.show_visibility !== false}"
           ></ha-switch>
-          <label class="switch-label">
-            Show Visibility
-          </label>
+          <label class="switch-label">${this.t('Show Visibility')}</label>
         ` : ''}
       </div>
           <div class="switch-container">
@@ -1363,27 +1421,21 @@ class WeatherChartCardEditor extends s {
               @change="${(e) => this._valueChanged(e, 'show_last_changed')}"
               .checked="${this._config.show_last_changed !== false}"
             ></ha-switch>
-            <label class="switch-label">
-              Show when last data changed
-            </label>
+            <label class="switch-label">${this.t('Show when last data changed')}</label>
           </div>
           <div class="switch-container">
             <ha-switch
               @change="${(e) => this._valueChanged(e, 'use_12hour_format')}"
               .checked="${this._config.use_12hour_format !== false}"
             ></ha-switch>
-            <label class="switch-label">
-              Use 12-Hour Format
-            </label>
+            <label class="switch-label">${this.t('Use 12-Hour Format')}</label>
           </div>
           <div class="switch-container">
             <ha-switch
               @change="${(e) => this._valueChanged(e, 'autoscroll')}"
               .checked="${this._config.autoscroll !== false}"
             ></ha-switch>
-            <label class="switch-label">
-              Autoscroll
-            </label>
+            <label class="switch-label">${this.t('Autoscroll')}</label>
           </div>
           <div class="time-container">
             <div class="switch-right">
@@ -1391,47 +1443,39 @@ class WeatherChartCardEditor extends s {
                 @change="${(e) => this._valueChanged(e, 'show_time')}"
                 .checked="${this._config.show_time !== false}"
               ></ha-switch>
-              <label class="switch-label">
-                Show Current Time
-              </label>
+              <label class="switch-label">${this.t('Show Current Time')}</label>
             </div>
             <div class="switch-right checkbox-container" style="${this._config.show_time ? 'display: flex;' : 'display: none;'}">
               <ha-checkbox
                 @change="${(e) => this._valueChanged(e, 'show_time_seconds')}"
                 .checked="${this._config.show_time_seconds !== false}"
               ></ha-checkbox>
-              <label class="check-label">
-                Show Seconds
-              </label>
+              <label class="check-label">${this.t('Show Seconds')}</label>
             </div>
             <div class="switch-right checkbox-container" style="${this._config.show_time ? 'display: flex;' : 'display: none;'}">
               <ha-checkbox
                 @change="${(e) => this._valueChanged(e, 'show_day')}"
                 .checked="${this._config.show_day !== false}"
               ></ha-checkbox>
-              <label class="check-label">
-                Show Day
-              </label>
+              <label class="check-label">${this.t('Show Day')}</label>
             </div>
             <div class="switch-right checkbox-container" style="${this._config.show_time ? 'display: flex;' : 'display: none;'}">
               <ha-checkbox
                 @change="${(e) => this._valueChanged(e, 'show_date')}"
                 .checked="${this._config.show_date !== false}"
               ></ha-checkbox>
-              <label class="check-label">
-                Show Date
-              </label>
+              <label class="check-label">${this.t('Show Date')}</label>
             </div>
           </div>
             <div class="flex-container" style="${this._config.show_time ? 'display: flex;' : 'display: none;'}">
               <ha-textfield
-                label="Time text size"
+                label="${this.t('Time text size')}"
                 type="number"
                 .value="${this._config.time_size || '26'}"
                 @change="${(e) => this._valueChanged(e, 'time_size')}"
               ></ha-textfield>
               <ha-textfield
-                label="Day and date text size"
+                label="${this.t('Day and date text size')}"
                 type="number"
                 .value="${this._config.day_date_size || '15'}"
                 @change="${(e) => this._valueChanged(e, 'day_date_size')}"
@@ -1443,9 +1487,7 @@ class WeatherChartCardEditor extends s {
                   @change="${(e) => this._valueChanged(e, 'animated_icons')}"
                   .checked="${this._config.animated_icons === true}"
                 ></ha-switch>
-                <label class="switch-label">
-                  Use Animated Icons
-                </label>
+                <label class="switch-label">${this.t('Use Animated Icons')}</label>
               </div>
               <div class="switch-right radio-container" style="${this._config.animated_icons ? 'display: flex;' : 'display: none;'}">
                   <ha-radio
@@ -1454,9 +1496,7 @@ class WeatherChartCardEditor extends s {
                     @change="${this._handleIconStyleChange}"
                     .checked="${this._config.icon_style === 'style1'}"
                   ></ha-radio>
-                  <label class="check-label">
-                    Style 1
-                  </label>
+                  <label class="check-label">${this.t('Style 1')}</label>
                 </div>
               <div class="switch-right radio-container" style="${this._config.animated_icons ? 'display: flex;' : 'display: none;'}">
                   <ha-radio
@@ -1465,62 +1505,60 @@ class WeatherChartCardEditor extends s {
                     @change="${this._handleIconStyleChange}"
                     .checked="${this._config.icon_style === 'style2'}"
                   ></ha-radio>
-                  <label class="check-label">
-                    Style 2
-                  </label>
+                  <label class="check-label">${this.t('Style 2')}</label>
                 </div>
               </div>
        <div class="textfield-container">
          <ha-textfield
-           label="Icon Size for animated or custom icons"
+           label="${this.t('Icon Size for animated or custom icons')}"
            type="number"
            .value="${this._config.icons_size || '25'}"
            @change="${(e) => this._valueChanged(e, 'icons_size')}"
          ></ha-textfield>
           <ha-textfield
-            label="Curent temperature Font Size"
+            label="${this.t('Curent temperature Font Size')}"
            type="number"
             .value="${this._config.current_temp_size || '28'}"
             @change="${(e) => this._valueChanged(e, 'current_temp_size')}"
           ></ha-textfield>
         <ha-textfield
-          label="Custom icon path"
+          label="${this.t('Custom icon path')}"
           .value="${this._config.icons || ''}"
           @change="${(e) => this._valueChanged(e, 'icons')}"
         ></ha-textfield>
          <ha-select
            naturalMenuWidth
            fixedMenuPosition
-           label="Select custom language"
+           label="${this.t('Select custom language')}"
            .configValue=${''}
            .value=${this._config.locale}
            @change=${(e) => this._valueChanged(e, 'locale')}
            @closed=${(ev) => ev.stopPropagation()}
          >
-           <ha-list-item .value=${''}>HA Default</ha-list-item>
-           <ha-list-item .value=${'bg'}>Bulgarian</ha-list-item>
-           <ha-list-item .value=${'ca'}>Catalan</ha-list-item>
-           <ha-list-item .value=${'cs'}>Czech</ha-list-item>
-           <ha-list-item .value=${'da'}>Danish</ha-list-item>
-           <ha-list-item .value=${'nl'}>Dutch</ha-list-item>
-           <ha-list-item .value=${'en'}>English</ha-list-item>
-           <ha-list-item .value=${'fi'}>Finnish</ha-list-item>
-           <ha-list-item .value=${'fr'}>French</ha-list-item>
-           <ha-list-item .value=${'de'}>German</ha-list-item>
-           <ha-list-item .value=${'el'}>Greek</ha-list-item>
-           <ha-list-item .value=${'hu'}>Hungarian</ha-list-item>
-           <ha-list-item .value=${'it'}>Italian</ha-list-item>
-           <ha-list-item .value=${'lt'}>Lithuanian</ha-list-item>
-           <ha-list-item .value=${'no'}>Norwegian</ha-list-item>
-           <ha-list-item .value=${'pl'}>Polish</ha-list-item>
-           <ha-list-item .value=${'pt'}>Portuguese</ha-list-item>
-           <ha-list-item .value=${'ro'}>Romanian</ha-list-item>
-           <ha-list-item .value=${'ru'}>Russian</ha-list-item>
-           <ha-list-item .value=${'sk'}>Slovak</ha-list-item>
-           <ha-list-item .value=${'es'}>Spanish</ha-list-item>
-           <ha-list-item .value=${'sv'}>Swedish</ha-list-item>
-	   <ha-list-item .value=${'uk'}>Ukrainian</ha-list-item>
-    	   <ha-list-item .value=${'ko'}>한국어</ha-list-item>
+           <ha-list-item .value=${''}>${this.t('HA Default')}</ha-list-item>
+           <ha-list-item .value=${'bg'}>${this.langName('bg')}</ha-list-item>
+           <ha-list-item .value=${'ca'}>${this.langName('ca')}</ha-list-item>
+           <ha-list-item .value=${'cs'}>${this.langName('cs')}</ha-list-item>
+           <ha-list-item .value=${'da'}>${this.langName('da')}</ha-list-item>
+           <ha-list-item .value=${'nl'}>${this.langName('nl')}</ha-list-item>
+           <ha-list-item .value=${'en'}>${this.langName('en')}</ha-list-item>
+           <ha-list-item .value=${'fi'}>${this.langName('fi')}</ha-list-item>
+           <ha-list-item .value=${'fr'}>${this.langName('fr')}</ha-list-item>
+           <ha-list-item .value=${'de'}>${this.langName('de')}</ha-list-item>
+           <ha-list-item .value=${'el'}>${this.langName('el')}</ha-list-item>
+           <ha-list-item .value=${'hu'}>${this.langName('hu')}</ha-list-item>
+           <ha-list-item .value=${'it'}>${this.langName('it')}</ha-list-item>
+           <ha-list-item .value=${'lt'}>${this.langName('lt')}</ha-list-item>
+           <ha-list-item .value=${'no'}>${this.langName('no')}</ha-list-item>
+           <ha-list-item .value=${'pl'}>${this.langName('pl')}</ha-list-item>
+           <ha-list-item .value=${'pt'}>${this.langName('pt')}</ha-list-item>
+           <ha-list-item .value=${'ro'}>${this.langName('ro')}</ha-list-item>
+           <ha-list-item .value=${'ru'}>${this.langName('ru')}</ha-list-item>
+           <ha-list-item .value=${'sk'}>${this.langName('sk')}</ha-list-item>
+           <ha-list-item .value=${'es'}>${this.langName('es')}</ha-list-item>
+           <ha-list-item .value=${'sv'}>${this.langName('sv')}</ha-list-item>
+	   <ha-list-item .value=${'uk'}>${this.langName('uk')}</ha-list-item>
+    	   <ha-list-item .value=${'ko'}>${this.langName('ko')}</ha-list-item>
         </ha-select>
         </div>
       </div>
@@ -1532,63 +1570,53 @@ class WeatherChartCardEditor extends s {
               @change="${(e) => this._valueChanged(e, 'forecast.condition_icons')}"
               .checked="${forecastConfig.condition_icons !== false}"
             ></ha-switch>
-            <label class="switch-label">
-              Show Condition Icons
-            </label>
+            <label class="switch-label">${this.t('Show Condition Icons')}</label>
           </div>
           <div class="switch-container">
             <ha-switch
               @change="${(e) => this._valueChanged(e, 'forecast.show_wind_forecast')}"
               .checked="${forecastConfig.show_wind_forecast !== false}"
             ></ha-switch>
-            <label class="switch-label">
-              Show Wind Forecast
-            </label>
+            <label class="switch-label">${this.t('Show Wind Forecast')}</label>
           </div>
           <div class="switch-container">
             <ha-switch
               @change="${(e) => this._valueChanged(e, 'forecast.round_temp')}"
               .checked="${forecastConfig.round_temp !== false}"
             ></ha-switch>
-            <label class="switch-label">
-              Rounding Temperatures
-            </label>
+            <label class="switch-label">${this.t('Rounding Temperatures')}</label>
           </div>
           <div class="switch-container">
             <ha-switch
               @change="${(e) => this._valueChanged(e, 'forecast.disable_animation')}"
               .checked="${forecastConfig.disable_animation !== false}"
             ></ha-switch>
-            <label class="switch-label">
-              Disable Chart Animation
-            </label>
+            <label class="switch-label">${this.t('Disable Chart Animation')}</label>
           </div>
 	  <div class="textfield-container">
           <ha-select
             naturalMenuWidth
             fixedMenuPosition
-            label="Precipitation Type (Probability if supported by the weather entity)"
+            label="${this.t('Precipitation Type (Probability if supported by the weather entity)')}"
             .configValue=${'forecast.precipitation_type'}
             .value=${forecastConfig.precipitation_type}
             @change=${(e) => this._valueChanged(e, 'forecast.precipitation_type')}
             @closed=${(ev) => ev.stopPropagation()}
           >
-            <ha-list-item .value=${'rainfall'}>Rainfall</ha-list-item>
-            <ha-list-item .value=${'probability'}>Probability</ha-list-item>
+            <ha-list-item .value=${'rainfall'}>${this.t('Rainfall')}</ha-list-item>
+            <ha-list-item .value=${'probability'}>${this.t('Probability')}</ha-list-item>
           </ha-select>
          <div class="switch-container" ?hidden=${forecastConfig.precipitation_type !== 'rainfall'}>
              <ha-switch
                @change="${(e) => this._valueChanged(e, 'forecast.show_probability')}"
                .checked="${forecastConfig.show_probability !== false}"
              ></ha-switch>
-             <label class="switch-label">
-               Show precipitation probability
-             </label>
+             <label class="switch-label">${this.t('Show precipitation probability')}</label>
          </div>
           <div class="textfield-container">
             <div class="flex-container">
               <ha-textfield
-                label="Precipitation Bar Size %"
+                label="${this.t('Precipitation Bar Size %')}"
                 type="number"
                 max="100"
                 min="0"
@@ -1596,7 +1624,7 @@ class WeatherChartCardEditor extends s {
                 @change="${(e) => this._valueChanged(e, 'forecast.precip_bar_size')}"
               ></ha-textfield>
               <ha-textfield
-                label="Labels Font Size"
+                label="${this.t('Labels Font Size')}"
                 type="number"
                 .value="${forecastConfig.labels_font_size || '11'}"
                 @change="${(e) => this._valueChanged(e, 'forecast.labels_font_size')}"
@@ -1604,13 +1632,13 @@ class WeatherChartCardEditor extends s {
               </div>
 	    <div class="flex-container">
               <ha-textfield
-                label="Chart height"
+                label="${this.t('Chart height')}"
                 type="number"
                 .value="${forecastConfig.chart_height || '180'}"
                 @change="${(e) => this._valueChanged(e, 'forecast.chart_height')}"
               ></ha-textfield>
               <ha-textfield
-                label="Number of forecasts"
+                label="${this.t('Number of forecasts')}"
                 type="number"
                 .value="${forecastConfig.number_of_forecasts || '0'}"
                 @change="${(e) => this._valueChanged(e, 'forecast.number_of_forecasts')}"
@@ -1626,7 +1654,7 @@ class WeatherChartCardEditor extends s {
             <ha-select
               naturalMenuWidth
               fixedMenuPosition
-              label="Convert pressure to"
+              label="${this.t('Convert pressure to')}"
               .configValue=${'units.pressure'}
               .value=${unitsConfig.pressure}
               @change=${(e) => this._valueChanged(e, 'units.pressure')}
@@ -1639,7 +1667,7 @@ class WeatherChartCardEditor extends s {
             <ha-select
               naturalMenuWidth
               fixedMenuPosition
-              label="Convert wind speed to"
+              label="${this.t('Convert wind speed to')}"
               .configValue=${'units.speed'}
               .value=${unitsConfig.speed}
               @change=${(e) => this._valueChanged(e, 'units.speed')}
@@ -1655,10 +1683,10 @@ class WeatherChartCardEditor extends s {
 
         <!-- Alternate Page -->
         <div class="page-container ${this.currentPage === 'alternate' ? 'active' : ''}">
-          <h5>Alternative sensors for the main card attributes:</h5>
+          <h5>${this.t('Alternative sensors for the main card attributes:')}</h5>
           <ha-form
             .data=${this._config}
-            .schema=${ALT_SCHEMA}
+            .schema=${ALT_SCHEMA.map((item) => ({ ...item, title: this.t(item.title) }))}
             .hass=${this.hass}
             @value-changed=${this._formValueChanged}
           ></ha-form>
